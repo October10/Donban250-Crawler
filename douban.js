@@ -13,7 +13,7 @@ class Movie {
         this.quote = ''
         this.ranking = 0
         this.coverUrl = ''
-        this.otherName = ''
+        this.otherNames = ''
     }
 }
 
@@ -30,13 +30,13 @@ var movieFromDiv = (div) => {
     movie.ranking = pic.find('em').text()
     movie.coverUrl = pic.find('img').attr('src')
 
-    let other = e('.other').text()
+    var other = e('.other').text()
     movie.otherNames = other.slice(3).split(' / ').join('|')
 
     return movie
 }
 
-var cachedUrl = url => {
+var cachedUrl = (url) => {
     // 1. 确定缓存的文件名
     var cacheFile = 'cached_html/' + url.split('?')[1] + '.html'
     // 2. 检查缓存文件是否存在
@@ -49,9 +49,9 @@ var cachedUrl = url => {
         return data
     } else {
         // 用 GET 方法获取 url 链接的内容
-        // 相当于你在浏览器地址栏输入 url 按回车后得到的 HTML 内容
+        // 相当于在浏览器地址栏输入 url 按回车后得到的 HTML 内容
         var r = request('GET', url)
-        // utf-8 是网页文件的文本编码
+        // utf-8 是网页文件的文本编码，查看源码 meta 标签
         var body = r.getBody('utf-8')
         fs.writeFileSync(cacheFile, body)
         return body
@@ -77,8 +77,7 @@ var moviesFromUrl = (url) => {
 }
 
 var saveMovie = (movies) => {
-    // JSON.stringify 第 2 3 个参数配合起来是为了让生成的 json
-    // 数据带有缩进的格式，第三个参数表示缩进的空格数
+    // JSON.stringify 第 2 3 个参数配合起来是为了让生成的 json 数据带有缩进的格式，第三个参数表示缩进的空格数
     var s = JSON.stringify(movies, null, 2)
     // 把 json 格式字符串写入到 文件 中
     var fs = require('fs')
@@ -105,12 +104,11 @@ var __main = () => {
         var start = i * 25
         var url = `https://movie.douban.com/top250?start=${start}&filter=`
         var moviesInPage = moviesFromUrl(url)
-        // 注意, 这是 ES6 的语法
+        // 注意, 扩展运算符是 ES6 的语法
         movies = [...movies, ...moviesInPage]
         // 常规语法
         // movies = movies.concat(moviesInPage)
     }
-    log('movies', movies)
     saveMovie(movies)
     downloadCovers(movies)
 }
